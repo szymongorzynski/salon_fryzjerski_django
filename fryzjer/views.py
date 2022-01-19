@@ -4,7 +4,7 @@ from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
 
 from fryzjer.models import User, Visit, Servicee
-from fryzjer.serializers import UserSerializer, LoginSerializer, VisitSerializer, ServiceeSerializer, RegisterSerializer, ProfileSerializer, UserIdSerializer
+from fryzjer.serializers import UserSerializer, LoginSerializer, VisitSerializer, VisitAllSerializer, VisitAddSerializer, ServiceeSerializer, RegisterSerializer, ProfileSerializer, UserIdSerializer, VisitStatusSerializer
 
 @csrf_exempt
 def getUser(request, id=0):
@@ -50,15 +50,15 @@ def registerApi(request, id=0):
 @csrf_exempt
 def visitApi(request, id=0):
     if request.method == 'GET':
-        visit = Visit.objects.filter(UserId=id, Status='N')
+        visit = Visit.objects.filter(userr=id, Status='N')
         visit_serializer = VisitSerializer(visit, many = True)
         return JsonResponse(visit_serializer.data, safe = False)
 
     elif request.method == 'POST':
         visit_data = JSONParser().parse(request)
-        visit_serializer = VisitSerializer(data = visit_data)
-        if visit_serializer.is_valid():
-            visit_serializer.save()
+        visit_add_serializer = VisitAddSerializer(data = visit_data)
+        if visit_add_serializer.is_valid():
+            visit_add_serializer.save()
             return JsonResponse("Visit Added Successfully", safe = False)
         return JsonResponse("Failed to Add", safe = False)
 
@@ -67,10 +67,19 @@ def visitApi(request, id=0):
         visit.delete()
         return JsonResponse("Deleted Succeffully!!", safe=False)
 
+    elif request.method == 'PUT':
+        visit_data = JSONParser().parse(request)
+        visit = Visit.objects.get(VisitId = id)
+        visit_serializer = VisitStatusSerializer(visit, data = visit_data)
+        if visit_serializer.is_valid():
+            visit_serializer.save()
+            return JsonResponse("Updated Successfully!!", safe = False)
+        return JsonResponse("Failed to Update.", safe = False)
+
 @csrf_exempt
 def visitApiW(request, id=0):
      if request.method == 'GET':
-        visit = Visit.objects.filter(UserId=id, Status='W')
+        visit = Visit.objects.filter(userr=id, Status='W')
         visit_serializer = VisitSerializer(visit, many = True)
         return JsonResponse(visit_serializer.data, safe = False)
 
@@ -90,4 +99,11 @@ def serviceeApi(request, id=0):
             servicee_serializer.save()
             return JsonResponse("Added Successfully", safe=False)
         return JsonResponse("Failed to Add", safe = False)
+
+@csrf_exempt
+def visitAllApi(request):
+    if request.method == 'GET':
+        visit = Visit.objects.filter(Status='N')
+        visit_serializer = VisitAllSerializer(visit, many = True)
+        return JsonResponse(visit_serializer.data, safe = False)
 

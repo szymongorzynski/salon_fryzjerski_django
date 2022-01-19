@@ -32,14 +32,25 @@ class ServiceeSerializer(serializers.ModelSerializer):
        model = Servicee
        fields = ('ServiceeId', 'Name', 'Price', 'Time')
 
+class VisitAddSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Visit
+        fields = ('VisitId', 'userr', 'servicee', 'Ddate', 'Hhour', 'Status')
+
 class VisitSerializer(serializers.ModelSerializer):
-    
-    # service = serializers.SerializerMethodField('x')
-
-    # def x(self, obj):
-    #     y = getattr(obj, 'Name')
-    #     return y
-
+    servicee = ServiceeSerializer(many=False)
     class Meta:
        model = Visit
-       fields = ('VisitId', 'UserId', 'ServiceeId', 'Ddate', 'Hhour', 'Status')
+       fields = ('VisitId', 'userr', 'Ddate', 'Hhour', 'Status', 'servicee')
+
+class VisitAllSerializer(serializers.ModelSerializer):
+    servicee = ServiceeSerializer(many=False)
+    userr = ProfileSerializer(many = False)
+    class Meta:
+       model = Visit
+       fields = ('VisitId', 'userr', 'Ddate', 'Hhour', 'Status', 'servicee')
+
+class VisitStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Visit
+        fields = ('VisitId', 'Status')
